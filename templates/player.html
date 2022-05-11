@@ -1,0 +1,13 @@
+{% extends './layout.html' %}
+
+{% block title %}{{ data.web }}{% endblock %}
+
+{% block body %}
+<h1>{{ data.bienvenida }}</h1>
+<h2>Bienvenidos a CloneHoot</h2>
+<form action = "/registrar" method = "POST">
+   <p><h3>Ingrese un nombre de Usuario</h3>
+   <p><input type = 'text' name = 'apodo'/></p>
+   <p><input type = 'submit' value = 'Jugar'/></p>
+</form>
+{% endblock %}
