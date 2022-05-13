@@ -26,12 +26,19 @@ class RQ:
                 if pregunta['correcta'] == 0:
                     pregunta['respuestas'].append(line[1:].strip("\n"))
                 else:
-                    raise ValueError("Only one correct answer")
+                    raise "Only one correct answer"
                 
                 pregunta['correcta'] = len(pregunta['respuestas'])
             elif line.startswith('='):
                 # Antes de añadir, verificar que la información es válida
-                
+                if pregunta['enunciado'] != '':
+                    print('ok')
+                if pregunta['respuestas'] != []:
+                    print('ok')
+                if pregunta['correcta'] != 0:
+                    print('ok')
+                else:
+                    raise 'Check the format of the test' 
                 # Añade, cambia el índice para la pregunta y limpia
                 self.preguntas[self.index] = pregunta
                 self.index += 1
