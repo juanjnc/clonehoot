@@ -1,23 +1,34 @@
 import threading
 from flask import Flask, render_template, request, make_response
 from readtxt import RQ
+from datetime import datetime, timedelta
 
-# Variables necesarias para la comunicación
+# Variables necesarias para la comunicación entre los dos procesos
 en_espera = True
 jugadores = {}
+pendientes = []
+tiempo_inicial = 0
+contador = 0
 
 # Funciones para la carga del cuestionario
 rq = RQ()
 rq.read_questions()
-# print(rq.title, rq.preguntas)
-
+pendientes = list(rq.preguntas.keys())
 
 # Funciones del profesor/maestro/director de juego
 host_player = Flask(__name__)
 
 
-@host_player.route("/")
+@host_player.route("/", methods=['GET', 'POST'])
 def index():
+    #Página principal del host
+    # Esto evita saltar la primera pregunta
+    global tiempo_inicial
+    tiempo_inicial = datetime.now().timestamp()
+    # TODO sincronizar con el inicio del test
+    if request.method == 'POST':
+        if request.form['submit_button'] == 'start':
+            pass
     # Creamos texto con la lista de jugadores
     lista_usuarios = ''
     for usuario in jugadores.values():
@@ -33,32 +44,63 @@ def index():
 
 @host_player.route("/test", methods=['GET', 'POST'])
 def test():
+    #Página del test, se va actualizando
+    # Cambios globales
     global en_espera
+    global tiempo_inicial
+    global contador
     en_espera = False
     lista_usuarios = ''
     titulo = rq.title
+    # fin del juego si la lista está vacia
+    if len(pendientes) == 0:
+        return fin()
+    # Lleva el número de preguntas y un contador para sincronizar a los jugadores
+    num_preg = pendientes[0]
+    contador = pendientes[0]
+    # TODO Problemas de Sync, da 10 segundos para responder
+    if datetime.now().timestamp() - tiempo_inicial > 10:
+        tiempo_inicial = datetime.now().timestamp()
+        pendientes.pop(0)
+    # TODO debería mostrar lista de jugadores por responder o ya respondidos
+    for usuario in jugadores.values():
+        if usuario['total'] == contador -1:
+            lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
+    # Los datos de las preguntas para presentarlos en cada pantalla
+    enunciado = rq.preguntas[num_preg]['enunciado']
+    respuestas = rq.preguntas[num_preg]['respuestas']
+    # Los datos para pasarlo a la plantilla
+    data = {
+        'web': 'CloneHoot - Quiz',
+        'titulo': titulo,
+        'preguntas': enunciado,
+        'respuestas': respuestas,
+        'usuarios': lista_usuarios,
+        'tiempo': datetime.now().timestamp() - tiempo_inicial
+    }
+    return render_template('test.html', data=data)
 
-    # TODO Consigo que muestre la primera, pero no que pase a la siguiente
-    for ii in rq.preguntas.keys():
-        for usuario in jugadores.values():
-            if usuario['total'] == ii:
-                lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
-        # Los datos de las preguntas para presentarlos en cada pantalla
-        enunciado = rq.preguntas[ii]['enunciado']
-        respuestas = rq.preguntas[ii]['respuestas']
-        # Los datos para pasarlo a la plantilla
-        data = {
-            'web': 'CloneHoot - Quiz',
-            'titulo': titulo,
-            'preguntas': enunciado,
-            'respuestas': respuestas,
-            'usuarios': lista_usuarios,
-        }
-        # TODO Intentos de conseguir que se actualice
-        if request.method == 'POST':
-            if request.form['next']:
-                ii += 1
-        return render_template('test.html', data=data)
+
+@host_player.route("/fin", methods=['GET', 'POST'])
+def fin():
+    # Página del final de partida
+    data = {
+        'web': 'CloneHoot - Quiz',
+        'ganador': ganador()[0],
+        'puntuacion': ganador()[1],
+    }
+    return render_template('fin.html', data=data)
+
+def ganador():
+    # Busca al ganador de la partida
+    maxima = -1
+    nombre = ''
+    for jugador, valores in jugadores.items():
+        if valores['puntuaciones'] > maxima:
+            maxima = valores['puntuaciones']
+            nombre = jugador
+    return [nombre, maxima]
+        
 
 
 # Funciones del jugador
@@ -71,34 +113,47 @@ def respuesta():
     usuario = request.cookies.get('apodo')
     # obtener el jugador
     jugador = jugadores[usuario]
-
+    # Obtener las respuestas
     titulo = rq.title
-    # TODO Consigo que muestre la primera, pero no que pase a la siguiente
-    for ii in rq.preguntas.keys():
-        enunciado = rq.preguntas[ii]['enunciado']
-        correcta = rq.preguntas[ii]['correcta']
+    num_preg = pendientes[0]
+    enunciado = rq.preguntas[num_preg]['enunciado']
+    correcta = rq.preguntas[num_preg]['correcta']
+    # si respuesta correcta sumar punto
+    if request.method == 'POST':
+        if request.form['submit_button'] == str(correcta):
+            jugador['puntuaciones'] += 1
+            print(jugador['puntuaciones'])
+        # Añade 1 al contador de preguntas realizadas
+        jugador['total'] += 1
+        return nextq()
 
-        # si respuesta correcta sumar punto
-        if request.method == 'POST':
-            if request.form['submit_button'] == str(correcta):
-                jugador['puntuaciones'] += 1
-                # print(jugador)
-            # TODO Una idea para llevar la contabilidad de preguntas superadas, funciona
-            jugador['total'] += 1
-            return nextq()
-
-        # TODO enviar a pagina siguiente
-        data = {
-            'web': 'CloneHoot - Quiz',
-            'titulo': titulo,
-            'preguntas': enunciado,
-        }
-        return render_template('respuesta.html', data=data)
+    data = {
+        'web': 'CloneHoot - Quiz',
+        'titulo': titulo,
+        'preguntas': enunciado,
+    }
+    return render_template('respuesta.html', data=data)
 
 
-# La plantilla para la espera a la siguiente pregunta
-@player_side.route("/next")
+
+@player_side.route("/next", methods=['GET', 'POST'])
 def nextq():
+    # La plantilla para la espera a la siguiente pregunta
+    global contador
+    global pendientes
+    usuario = request.cookies.get('apodo')
+    jugador = jugadores[usuario]
+    if len(pendientes) == 0:
+        # fin del juego
+        data = {
+        'web': 'CloneHoot - Quiz',
+        'ganador': ganador()[0],
+        'puntuacion': ganador()[1],
+        }
+        return render_template('fin.html', data=data)
+    if jugador['total'] == contador:
+        return respuesta()
+        
     data = {
         'web': 'CloneHoot - Quiz',
     }
@@ -107,6 +162,7 @@ def nextq():
 
 @player_side.route("/")
 def index():
+    # Página principal del jugador
     data = {
         'web': 'CloneHoot',
         'bienvenida': '¡Saludos, Jugadores!',
@@ -116,9 +172,10 @@ def index():
 
 @player_side.route("/registrar", methods=['POST', 'GET'])
 def registrar():
+    # Primera página de espera para el jugador
     if request.method == 'POST':
         user = request.form['apodo']
-
+    # Se crea una cookie con el usuario dado
     nuevo_usuario = {'apodo': user, 'puntuaciones': 0, 'total': 0}
     jugadores[user] = nuevo_usuario
     bienvenido = f'Hola {user}, enseguida empezamos'
@@ -134,6 +191,8 @@ def registrar():
 
 @player_side.route('/espera')
 def espera():
+    # Primera página de espera para el jugador
+    # Cuando el host da la orden se redirije a la partida
     if en_espera is True:
         redirigida = 'espera'
     else:
@@ -143,7 +202,7 @@ def espera():
     data = {
         'web': 'CloneHoot',
         'bienvenida': bienvenido,
-        'refrescar': f'3; URL={redirigida}'
+        'refrescar': f'1; URL={redirigida}'
     }
     return render_template('espera2.html', data=data)
 

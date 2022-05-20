@@ -3,6 +3,8 @@
 {% block title %}{{ data.web }}{% endblock %}
 
 {% block body %}
-   <h1>Esperando al resto de Jugadores</h1>
-   <meta http-equiv="refresh" content="1; URL=next" />
+   <h1>Juego terminado. Ganador:</h1>
+   <h2>{{ data.ganador }}</h2>
+   <h2>{{ data.puntuacion }}</h2>
+
 {% endblock %}
