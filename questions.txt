@@ -1,22 +1,22 @@
-TEMATICA DE LAS PREGUNTAS
+TOPIC OF THE TEST
 
-*PREGUNTA 1
--respuesta falsa 1.1
--respuesta falsa 1.2
--respuesta falsa 1.3
-+respuesta verdadera 1
-=
+*QUESTION TITLE
+-WRONG ANSWER
++CORRECT ANSWER
+-WRONG ANSWER
+-WRONG ANSWER
+= END OF QUESTION
 
-*PREGUNTA 2
-+respuesta verdadera 2
--respuesta falsa 2.1
--respuesta falsa 2.2
--respuesta falsa 2.3
-=
+*QUESTION TITLE
+-WRONG ANSWER
+-WRONG ANSWER
+-WRONG ANSWER
++CORRECT ANSWER
+= END OF QUESTION
 
-*PREGUNTA 3
--respuesta falsa 3.1
-+respuesta verdadera 3
--respuesta falsa 3.2
--respuesta falsa 3.3
-=
+*QUESTION TITLE
++CORRECT ANSWER
+-WRONG ANSWER
+-WRONG ANSWER
+-WRONG ANSWER
+= END OF QUESTION
