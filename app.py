@@ -211,17 +211,17 @@ def espera():
     return render_template('404.html'), 404'''
 
 
-def arranca1():
+def start_host():
     host_player.run(port=5000)
 
 
-def arranca2():
-    player_side.run(port=5001)
+def start_player(): #host="0.0.0.0" will make the page accessable
+    player_side.run(port=5001) 
 
 
 if __name__ == '__main__':
-    thread1 = threading.Thread(target=arranca1)
-    thread2 = threading.Thread(target=arranca2)
+    thread1 = threading.Thread(target=start_host)
+    thread2 = threading.Thread(target=start_player)
     thread1.start()
     thread2.start()
     thread1.join()
