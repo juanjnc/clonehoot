@@ -76,7 +76,7 @@ def test():
         'preguntas': enunciado,
         'respuestas': respuestas,
         'usuarios': lista_usuarios,
-        'tiempo': datetime.now().timestamp() - tiempo_inicial
+        'tiempo': int(datetime.now().timestamp() - tiempo_inicial)
     }
     return render_template('test.html', data=data)
 
@@ -215,7 +215,7 @@ def start_host():
     host_player.run(port=5000)
 
 
-def start_player(): #host="0.0.0.0" will make the page accessable
+def start_player(): # TODO host="0.0.0.0" will make the page accessable
     player_side.run(port=5001) 
 
 
