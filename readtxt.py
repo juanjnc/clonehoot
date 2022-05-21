@@ -9,7 +9,7 @@ class RQ:
         # Es más fácil declarando las llaves y el valor ya, ahorra forzar tipos luego
         pregunta = {'enunciado': '', 'respuestas': [], 'correcta': 0}
 
-        with open('questions.txt') as questions:
+        with open('questions.txt', encoding="utf8") as questions:
             questions = questions.readlines()
 
         self.title = questions[0]
