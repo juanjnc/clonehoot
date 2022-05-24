@@ -1,7 +1,7 @@
 import threading
 from flask import Flask, render_template, request, make_response
 from readtxt import RQ
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Variables necesarias para la comunicación entre los dos procesos
 en_espera = True
@@ -21,7 +21,7 @@ host_player = Flask(__name__)
 
 @host_player.route("/", methods=['GET', 'POST'])
 def index():
-    #Página principal del host
+    # Página principal del host
     # Esto evita saltar la primera pregunta
     global tiempo_inicial
     tiempo_inicial = datetime.now().timestamp()
@@ -44,7 +44,7 @@ def index():
 
 @host_player.route("/test", methods=['GET', 'POST'])
 def test():
-    #Página del test, se va actualizando
+    # Página del test, se va actualizando
     # Cambios globales
     global en_espera
     global tiempo_inicial
@@ -64,7 +64,7 @@ def test():
         pendientes.pop(0)
     # TODO debería mostrar lista de jugadores por responder o ya respondidos
     for usuario in jugadores.values():
-        if usuario['total'] == contador -1:
+        if usuario['total'] == contador - 1:
             lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
     # Los datos de las preguntas para presentarlos en cada pantalla
     enunciado = rq.preguntas[num_preg]['enunciado']
@@ -91,6 +91,7 @@ def fin():
     }
     return render_template('fin.html', data=data)
 
+
 def ganador():
     # Busca al ganador de la partida
     maxima = -1
@@ -100,7 +101,6 @@ def ganador():
             maxima = valores['puntuaciones']
             nombre = jugador
     return [nombre, maxima]
-        
 
 
 # Funciones del jugador
@@ -135,7 +135,6 @@ def respuesta():
     return render_template('respuesta.html', data=data)
 
 
-
 @player_side.route("/next", methods=['GET', 'POST'])
 def nextq():
     # La plantilla para la espera a la siguiente pregunta
@@ -146,14 +145,14 @@ def nextq():
     if len(pendientes) == 0:
         # fin del juego
         data = {
-        'web': 'CloneHoot - Quiz',
-        'ganador': ganador()[0],
-        'puntuacion': ganador()[1],
+            'web': 'CloneHoot - Quiz',
+            'ganador': ganador()[0],
+            'puntuacion': ganador()[1],
         }
         return render_template('fin.html', data=data)
     if jugador['total'] == contador:
         return respuesta()
-        
+
     data = {
         'web': 'CloneHoot - Quiz',
     }
@@ -215,8 +214,8 @@ def start_host():
     host_player.run(port=5000)
 
 
-def start_player(): # TODO host="0.0.0.0" will make the page accessable
-    player_side.run(port=5001) 
+def start_player():  # TODO host="0.0.0.0" will make the page accessable
+    player_side.run(port=5001)
 
 
 if __name__ == '__main__':
