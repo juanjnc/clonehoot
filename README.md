@@ -16,10 +16,10 @@ to this (for example):
     def  start_player():
 	    player_side.run(host="0.0.0.0", port=5001)
 
- - Players run in that IP Adress
+ - Players run in that IP Address
  - Game Server run in 127.0.0.1:5000
 
-You must change the content of *questions.txt* following this patern:
+You must change the content of *questions.txt* following this pattern:
 
     TOPIC OF THE TEST
     
