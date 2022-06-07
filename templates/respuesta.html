@@ -1,14 +1,22 @@
-{% extends './layout.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ data.web }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout_answer.css') }}">
+</head>
 
-{% block title %}{{ data.web }}{% endblock %}
+<body>
+    <h1>{{ data.titulo }}</h1>
+    <h2>{{ data.preguntas }}</h2>
+    <form method="POST">
+        <input type="submit" id='button_1' name="submit_button" value="1">
+        <input type="submit" id='button_2' name="submit_button" value="2">
+        <input type="submit" id='button_3' name="submit_button" value="3">
+        <input type="submit" id='button_4' name="submit_button" value="4">
+    </form>
+</body>
 
-{% block body %}
-<h1>{{ data.titulo }}</h1>
-<h2>{{ data.preguntas }}</h2>
-<form method="POST">
-    <input type="submit" name="submit_button" value="1">
-    <input type="submit" name="submit_button" value="2">
-    <input type="submit" name="submit_button" value="3">
-    <input type="submit" name="submit_button" value="4">
-</form>
-{% endblock %}
+</html>
