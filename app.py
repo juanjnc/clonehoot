@@ -1,7 +1,7 @@
 import threading
 from flask import Flask, render_template, request, make_response
 from readtxt import RQ
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Variables necesarias para la comunicación entre los dos procesos
 en_espera = True
@@ -24,8 +24,8 @@ def index():
     # Página principal del host
     # Esto evita saltar la primera pregunta
     global tiempo_inicial
-    tiempo_inicial = datetime.now().timestamp()
     # TODO sincronizar con el inicio del test
+    tiempo_inicial = datetime.now().timestamp()
     if request.method == 'POST':
         if request.form['submit_button'] == 'start':
             pass
@@ -58,8 +58,8 @@ def test():
     # Lleva el número de preguntas y un contador para sincronizar a los jugadores
     num_preg = pendientes[0]
     contador = pendientes[0]
-    # TODO Problemas de Sync, da 10 segundos para responder
-    if datetime.now().timestamp() - tiempo_inicial > 10:
+    # TODO Problemas de Sync, da 15 segundos para responder
+    if datetime.now().timestamp() - tiempo_inicial > 15:
         tiempo_inicial = datetime.now().timestamp()
         pendientes.pop(0)
     # TODO debería mostrar lista de jugadores por responder o ya respondidos
@@ -88,6 +88,7 @@ def fin():
         'web': 'CloneHoot - Quiz',
         'ganador': ganador()[0],
         'puntuacion': ganador()[1],
+        'lista':ganador()[2],
     }
     return render_template('fin.html', data=data)
 
@@ -96,11 +97,15 @@ def ganador():
     # Busca al ganador de la partida
     maxima = -1
     nombre = ''
+    lista = []
+    
     for jugador, valores in jugadores.items():
+        lista.append(f"{jugador} => {valores['puntuaciones']}")
         if valores['puntuaciones'] > maxima:
             maxima = valores['puntuaciones']
             nombre = jugador
-    return [nombre, maxima]
+    print(lista)
+    return [nombre, maxima, lista]
 
 
 # Funciones del jugador
@@ -148,6 +153,7 @@ def nextq():
             'web': 'CloneHoot - Quiz',
             'ganador': ganador()[0],
             'puntuacion': ganador()[1],
+            'lista':ganador()[2],
         }
         return render_template('fin.html', data=data)
     if jugador['total'] == contador:
