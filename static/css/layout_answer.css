@@ -1,44 +1,38 @@
+html {
+    height: 100%; 
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
 body {
     background-color: bisque;
     text-align: center;
     color: black;
     font-size: x-large;
-
 }
 
 input[type=submit] {
     cursor:pointer;
-    border: 3px solid #000000;
-    display: table-cell;
-    width: 15%;
-    padding-bottom: 5%;
-    padding-top: 5%;
-    font-size: xx-large;
     border-radius: 3px;
-    margin-bottom: 10px;
-    margin-right: 10px;
+    float: left;
+    font-size: xx-large;
+    width: 50%;
+    height: 30vh;
+    vertical-align: middle;
 }
 
 #button_1{
     background: red;
-    text-align: center;
-    vertical-align: middle;
 }
 
 #button_2{
-    background: green;
-    text-align: center;
-    vertical-align: middle;
+    background: LimeGreen;
 }
 
 #button_3{
     background: yellow;
-    text-align: center;
-    vertical-align: middle;
 }
 
 #button_4{
-    background: blue;
-    text-align: center;
-    vertical-align: middle;
+    background: RoyalBlue;
 }

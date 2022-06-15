@@ -1,0 +1,36 @@
+html {
+  height: 100%; 
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+body {
+  background-color: bisque;
+  text-align: center;
+  color: black;
+  font-size: x-large;
+}
+
+li{
+  align-items: center;
+  border: 3px solid black;
+  border-radius: 3px;
+  display: flex;
+  height: 12vh;
+  justify-content: space-around;
+  margin-bottom: 0.5%;
+  margin-top: 0.5%;
+  vertical-align: middle;
+}
+.one{
+  background: red;
+}
+.two{
+  background: LimeGreen;
+}
+.three{
+  background: yellow;
+}
+.four{
+  background: RoyalBlue;
+}
