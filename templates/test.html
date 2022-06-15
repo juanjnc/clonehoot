@@ -1,17 +1,25 @@
-{% extends './layout.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ data.web }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout_test.css') }}">
+</head>
 
-{% block title %}{{ data.web }}{% endblock %}
-
-{% block body %}
+<body>
 <h1>{{ data.titulo }}</h1>
 <h2>{{ data.preguntas }}</h2>
 <ol>
-    <li>{{data.respuestas[0]}}</li>
-    <li>{{data.respuestas[1]}}</li>
-    <li>{{data.respuestas[2]}}</li>
-    <li>{{data.respuestas[3]}}</li>
+    <li class="one">1. {{data.respuestas[0]}}</li>
+    <li class="two">2. {{data.respuestas[1]}}</li>
+    <li class="three">3. {{data.respuestas[2]}}</li>
+    <li class="four">4. {{data.respuestas[3]}}</li>
 </ol>
 <h3>{{ data.tiempo }}</h3>
 <h3>{{ data.usuarios }}</h3>
 <meta http-equiv="refresh" content="1; URL=test" />
-{% endblock %}
+</body>
+
+</html>
