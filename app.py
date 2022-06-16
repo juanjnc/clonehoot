@@ -1,6 +1,6 @@
 import threading
 from flask import Flask, render_template, request, make_response
-from readtxt import RQ
+from readtests import RT
 from datetime import datetime, timedelta
 
 # Variables necesarias para la comunicación entre los dos procesos
@@ -11,9 +11,8 @@ tiempo_inicial = 0
 contador = 0
 
 # Funciones para la carga del cuestionario
-rq = RQ()
-rq.read_questions()
-pendientes = list(rq.preguntas.keys())
+rt = RT()
+pendientes = list(rt.preguntas.keys())
 
 # Funciones del profesor/maestro/director de juego
 host_player = Flask(__name__)
@@ -51,7 +50,7 @@ def test():
     global contador
     en_espera = False
     lista_usuarios = ''
-    titulo = rq.title
+    titulo = rt.title
     # fin del juego si la lista está vacia
     if len(pendientes) == 0:
         return fin()
@@ -67,8 +66,8 @@ def test():
         if usuario['total'] == contador - 1:
             lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
     # Los datos de las preguntas para presentarlos en cada pantalla
-    enunciado = rq.preguntas[num_preg]['enunciado']
-    respuestas = rq.preguntas[num_preg]['respuestas']
+    enunciado = rt.preguntas[num_preg]['TITLE']
+    respuestas = rt.preguntas[num_preg]['answers']
     # Los datos para pasarlo a la plantilla
     data = {
         'web': 'CloneHoot - Quiz',
@@ -119,10 +118,10 @@ def respuesta():
     # obtener el jugador
     jugador = jugadores[usuario]
     # Obtener las respuestas
-    titulo = rq.title
+    titulo = rt.title
     num_preg = pendientes[0]
-    enunciado = rq.preguntas[num_preg]['enunciado']
-    correcta = rq.preguntas[num_preg]['correcta']
+    enunciado = rt.preguntas[num_preg]['TITLE']
+    correcta = rt.preguntas[num_preg]['correct']
     # si respuesta correcta sumar punto
     if request.method == 'POST':
         if request.form['submit_button'] == str(correcta):
@@ -221,7 +220,7 @@ def start_host():
 
 
 def start_player():  # TODO host="0.0.0.0" will make the page accessable
-    player_side.run(port=5001)
+    player_side.run(host="0.0.0.0", port=5001)
 
 
 if __name__ == '__main__':
