@@ -2,7 +2,7 @@
 
 CloneHoot is a WebApp inspired by **kahoot.it**.
 
-Built using **Flask**, which you need  in order to run it
+Built using **Flask** and **PyYALM**, both required to run correctly the program
 
 # How to use
 
