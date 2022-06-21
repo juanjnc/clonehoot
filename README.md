@@ -24,22 +24,22 @@ You must change the content of *test.yaml* following this pattern:
     TOPIC: EXAMPLE TITLE
 
     TEST:
-    1:
-        TITLE: QUESTION TITLE 1
-        answers:
-        - WRONG ANSWER
-        - CORRECT ANSWER
-        - WRONG ANSWER
-        - WRONG ANSWER
-        correct: 2
-    2:
-        TITLE: QUESTION TITLE 2
-        answers:
-        - WRONG ANSWER
-        - WRONG ANSWER
-        - WRONG ANSWER
-        - CORRECT ANSWER
-        correct: 4
+      1:
+          TITLE: QUESTION TITLE 1
+          answers:
+            - WRONG ANSWER
+            - CORRECT ANSWER
+            - WRONG ANSWER
+            - WRONG ANSWER
+          correct: 2
+      2:
+          TITLE: QUESTION TITLE 2
+          answers:
+            - WRONG ANSWER
+            - WRONG ANSWER
+            - WRONG ANSWER
+            - CORRECT ANSWER
+          correct: 4
     
     REPEAT QUESTION FORMAT
 
