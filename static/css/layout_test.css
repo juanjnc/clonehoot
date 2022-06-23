@@ -8,8 +8,10 @@ body {
   background-color: Silver;
   text-align: center;
   color: black;
-  font-size: x-large;
   font-family: 'Helvetica', 'Arial', sans-serif;
+}
+head {
+  font-size: x-large;
 }
 
 li{
@@ -17,6 +19,7 @@ li{
   border: 3px solid black;
   border-radius: 3px;
   display: flex;
+  font-size: x-large;
   height: 12vh;
   justify-content: space-around;
   margin-bottom: 0.5%;
