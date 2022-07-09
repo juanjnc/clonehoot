@@ -20,10 +20,10 @@ li{
   border-radius: 3px;
   display: flex;
   font-size: x-large;
-  height: 12vh;
+  height: 10vh;
   justify-content: space-around;
-  margin-bottom: 0.5%;
-  margin-top: 0.5%;
+  margin-bottom: 0.3%;
+  margin-top: 0.3%;
   vertical-align: middle;
 }
 .one{
