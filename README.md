@@ -2,8 +2,19 @@
 
 CloneHoot is a WebApp inspired by **kahoot.it**.
 
-Built using **Flask** and **PyYALM**, both required to run correctly the program
+Built using **Flask** and **PyYALM**, both required to run correctly the program:
 
+    pip install Flask or pip3 install Flask
+
+    pip install PyYAML or pip3 install PyYAML
+
+Linux and MacOS users need to manually install Tkinter
+
+For MacOS you can use this guide:
+https://www.geeksforgeeks.org/how-to-install-tkinter-on-macos/
+
+For Linux you can use this guide:
+https://www.geeksforgeeks.org/how-to-install-tkinter-on-linux/
 # How to use
 
 You must change this
@@ -33,7 +44,7 @@ You must change the content of *test.yaml* following this pattern:
             - WRONG ANSWER
           correct: 2
       2:
-          TITLE: QUESTION TITLE 2
+          TITLE: PICTURE.PNG
           answers:
             - WRONG ANSWER
             - WRONG ANSWER
@@ -48,3 +59,4 @@ You must change the content of *test.yaml* following this pattern:
  - You must not alter the **TOPIC**, **TEST**, **TITLE**, **answer** and **correct** keywords 
  - You may change the position of the correct answer in the list
  - You may have any number of questions, must have at least 1
+ - The **TITLE** can be a picture in png format. Place the picture in the same folder and fill the **TITLE** with the name and extension.
