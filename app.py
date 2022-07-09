@@ -8,7 +8,8 @@ rt = RT()
 en_espera = True
 jugadores = {}
 pendientes = [0]
-tiempo_inicial = 0
+start_time = 0
+question_time = 15
 contador = 0
 pendientes = list(rt.questions.keys())
 
@@ -19,7 +20,7 @@ host_player = Flask(__name__)
 @host_player.route("/", methods=['GET', 'POST'])
 def index():
     # Página principal del host
-    global tiempo_inicial
+    global start_time
 
     # Creamos texto con la lista de jugadores
     lista_usuarios = ''
@@ -28,7 +29,7 @@ def index():
         lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
 
     if request.method == 'POST':
-        tiempo_inicial = datetime.now().timestamp()
+        start_time = datetime.now().timestamp()
 
         if request.form['submit_button'] == 'start':
             return test()
@@ -47,11 +48,12 @@ def test():
     # Página del test, se va actualizando
     # Cambios globales
     global en_espera
-    global tiempo_inicial
+    global start_time
     global contador
     global pendientes
 
     en_espera = False
+    time_remaining = (question_time - int(datetime.now().timestamp() - start_time))
     lista_usuarios = ''
     topic = rt.topic
 
@@ -72,8 +74,8 @@ def test():
             lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
 
     # 15 segundos para responder
-    if datetime.now().timestamp() - tiempo_inicial >= 15:
-        tiempo_inicial = datetime.now().timestamp()
+    if datetime.now().timestamp() - start_time >= question_time:
+        start_time = datetime.now().timestamp()
         pendientes.pop(0)
         
 
@@ -84,7 +86,7 @@ def test():
             'preguntas': enunciado,
             'respuestas': respuestas,
             'usuarios': lista_usuarios,
-            'tiempo': int(datetime.now().timestamp() - tiempo_inicial)
+            'tiempo': time_remaining
         }
 
         return render_template('test_img.html', data=data, image=url_for('download_file', name=enunciado))
@@ -96,7 +98,7 @@ def test():
         'preguntas': enunciado,
         'respuestas': respuestas,
         'usuarios': lista_usuarios,
-        'tiempo': int(datetime.now().timestamp() - tiempo_inicial)
+        'tiempo': time_remaining
     }
 
     return render_template('test.html', data=data)
