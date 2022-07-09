@@ -1,0 +1,43 @@
+html {
+  height: 100%; 
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+body {
+  background-color: Silver;
+  text-align: center;
+  color: black;
+  font-family: 'Helvetica', 'Arial', sans-serif;
+}
+head {
+  font-size: x-large;
+}
+img{
+  width: 15%;
+  height: 15%;
+}
+li{
+  align-items: center;
+  border: 3px solid black;
+  border-radius: 3px;
+  display: flex;
+  font-size: x-large;
+  height: 10vh;
+  justify-content: space-around;
+  margin-bottom: 0.3%;
+  margin-top: 0.3%;
+  vertical-align: middle;
+}
+.one{
+  background: red;
+}
+.two{
+  background: LimeGreen;
+}
+.three{
+  background: yellow;
+}
+.four{
+  background: RoyalBlue;
+}
