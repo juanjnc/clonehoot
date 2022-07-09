@@ -1,5 +1,3 @@
-from errno import ESTALE
-from site import execsitecustomize
 import threading
 from flask import Flask, render_template, request, make_response, send_from_directory, url_for
 from readtests import RT
