@@ -1,7 +1,9 @@
+from errno import ESTALE
+from site import execsitecustomize
 import threading
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, send_from_directory, url_for
 from readtests import RT
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Variables necesarias para la comunicación entre los dos procesos
 rt = RT()
@@ -53,7 +55,7 @@ def test():
 
     en_espera = False
     lista_usuarios = ''
-    titulo = rt.title
+    topic = rt.topic
 
     # fin del juego si la lista está vacia
     if len(pendientes) == 0:
@@ -66,7 +68,7 @@ def test():
     enunciado = rt.questions[num_preg]['TITLE']
     respuestas = rt.questions[num_preg]['answers']
 
-    # TODO debería mostrar lista de jugadores por responder o ya respondidos
+    # debería mostrar lista de jugadores por responder o ya respondidos
     for usuario in jugadores.values():
         if usuario['total'] == contador:
             lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
@@ -75,11 +77,24 @@ def test():
     if datetime.now().timestamp() - tiempo_inicial >= 15:
         tiempo_inicial = datetime.now().timestamp()
         pendientes.pop(0)
+        
+
+    if enunciado.endswith('.png'):
+        data = {
+            'web': 'CloneHoot - Quiz',
+            'topic': topic,
+            'preguntas': enunciado,
+            'respuestas': respuestas,
+            'usuarios': lista_usuarios,
+            'tiempo': int(datetime.now().timestamp() - tiempo_inicial)
+        }
+
+        return render_template('test_img.html', data=data, image=url_for('download_file', name=enunciado))
 
     # Los datos para pasarlo a la plantilla
     data = {
         'web': 'CloneHoot - Quiz',
-        'titulo': titulo,
+        'topic': topic,
         'preguntas': enunciado,
         'respuestas': respuestas,
         'usuarios': lista_usuarios,
@@ -87,6 +102,11 @@ def test():
     }
 
     return render_template('test.html', data=data)
+
+
+@host_player.route('/<path:name>')
+def download_file(name):
+    return send_from_directory('./tests', name, as_attachment=True)
 
 
 @host_player.route("/fin", methods=['GET', 'POST'])
@@ -119,19 +139,28 @@ def index():
 
 @player_side.route("/registrar", methods=['POST', 'GET'])
 def registrar():
+    global jugadores
     # Primera página de espera para el jugador
     if request.method == 'POST':
         user = request.form['apodo']
-
+    
+    # Comprueba si el user existe
+    if user in jugadores:
+        data = {
+        'web': 'CloneHoot',
+    }
+        return render_template('player_taken.html', data=data)
+        
     # Se crea una cookie con el usuario dado
     nuevo_usuario = {'apodo': user, 'puntuaciones': 0, 'total': -1}
     jugadores[user] = nuevo_usuario
     bienvenido = f'Hola {user}, enseguida empezamos'
-
+    
     data = {
         'web': 'CloneHoot',
         'bienvenida': bienvenido,
     }
+    
 
     resp = make_response(render_template('espera.html', data=data))
     resp.set_cookie('apodo', user)
@@ -169,7 +198,7 @@ def respuesta():
     jugador = jugadores[usuario]
 
     # Obtener las respuestas
-    titulo = rt.title
+    topic = rt.topic
     num_preg = pendientes[0]
     enunciado = rt.questions[num_preg]['TITLE']
     correcta = rt.questions[num_preg]['correct']
@@ -197,8 +226,7 @@ def respuesta():
 
     data = {
         'web': 'CloneHoot - Quiz',
-        'titulo': titulo,
-        'preguntas': enunciado,
+        'topic': topic,
     }
 
     return render_template('respuesta.html', data=data)
@@ -253,7 +281,8 @@ def ganador():
         if valores['puntuaciones'] > maxima:
             maxima = valores['puntuaciones']
             nombre = jugador
-
+    lista.sort()
+    
     return [nombre, maxima, lista]
 
 
