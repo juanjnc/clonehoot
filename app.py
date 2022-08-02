@@ -53,7 +53,6 @@ def test():
     global pendientes
 
     en_espera = False
-    time_remaining = (question_time - int(datetime.now().timestamp() - start_time))
     lista_usuarios = ''
     topic = rt.topic
 
@@ -67,6 +66,8 @@ def test():
     # Los datos de las preguntas para presentarlos en cada pantalla
     enunciado = rt.questions[num_preg]['TITLE']
     respuestas = rt.questions[num_preg]['answers']
+    # Devuelve ell tiempo restante de la pregunta
+    time_remaining = (question_time - int(datetime.now().timestamp() - start_time))
 
     # debería mostrar lista de jugadores por responder o ya respondidos
     for usuario in jugadores.values():
