@@ -7,7 +7,6 @@ from datetime import datetime
 rt = RT()
 en_espera = True
 jugadores = {}
-pendientes = [0]
 start_time = 0
 question_time = 15
 contador = 0
@@ -78,7 +77,6 @@ def test():
     if datetime.now().timestamp() - start_time >= question_time:
         start_time = datetime.now().timestamp()
         pendientes.pop(0)
-        
 
     if enunciado.endswith('.png'):
         data = {
@@ -144,24 +142,23 @@ def registrar():
     # Primera página de espera para el jugador
     if request.method == 'POST':
         user = request.form['apodo']
-    
+
     # Comprueba si el user existe
     if user in jugadores:
         data = {
-        'web': 'CloneHoot',
-    }
+            'web': 'CloneHoot',
+        }
         return render_template('player_taken.html', data=data)
-        
+
     # Se crea una cookie con el usuario dado
     nuevo_usuario = {'apodo': user, 'puntuaciones': 0, 'total': -1}
     jugadores[user] = nuevo_usuario
     bienvenido = f'Hola {user}, enseguida empezamos'
-    
+
     data = {
         'web': 'CloneHoot',
         'bienvenida': bienvenido,
     }
-    
 
     resp = make_response(render_template('espera.html', data=data))
     resp.set_cookie('apodo', user)
@@ -201,7 +198,6 @@ def respuesta():
     # Obtener las respuestas
     topic = rt.topic
     num_preg = pendientes[0]
-    enunciado = rt.questions[num_preg]['TITLE']
     correcta = rt.questions[num_preg]['correct']
 
     print('\n')
@@ -214,9 +210,10 @@ def respuesta():
     if request.method == 'POST':
         # Añade 1 al contador de preguntas realizadas
         jugador['total'] += 1
-        print(f'El jugador ha respondido en la pregunta {num_preg} haciendo un total de respondidas de ' + str(jugador['total']))
+        print(f'El jugador ha respondido en la pregunta {num_preg} haciendo un total de respondidas de ' + str(
+            jugador['total']))
         print('\n')
-        
+
         # si respuesta correcta sumar punto
         if request.form['submit_button'] == str(correcta):
             jugador['puntuaciones'] += 1
@@ -283,7 +280,7 @@ def ganador():
             maxima = valores['puntuaciones']
             nombre = jugador
     lista.sort()
-    
+
     return [nombre, maxima, lista]
 
 
