@@ -200,13 +200,13 @@ def respuesta():
     num_preg = pendientes[0]
     correcta = rt.questions[num_preg]['correct']
 
-    print('\n')
+    '''print('\n')
     print('INFO AL ACTUALIZARSE LA PÁGINA')
     print('La puntuación es de:' + str(jugador['puntuaciones']))
     print('el total de preguntas respondidas es de:' + str(jugador['total']))
     print(f'El valor de pendientes es de {pendientes}')
     print(f'estamos en en la pregunta {pendientes[0]}')
-    print('\n')
+    print('\n')'''
     if request.method == 'POST':
         # Añade 1 al contador de preguntas realizadas
         jugador['total'] += 1
@@ -217,8 +217,8 @@ def respuesta():
         # si respuesta correcta sumar punto
         if request.form['submit_button'] == str(correcta):
             jugador['puntuaciones'] += 1
-            print(f'El jugador ha obtenido un punto con una puntuacion total de: ' + str(jugador['puntuaciones']))
-            print('\n')
+            '''print(f'El jugador ha obtenido un punto con una puntuacion total de: ' + str(jugador['puntuaciones']))
+            print('\n')'''
 
         return nextq()
 
