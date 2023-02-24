@@ -2,11 +2,14 @@
 
 CloneHoot is a WebApp inspired by **kahoot.it**.
 
-Built using **Flask** and **PyYALM**, both required to run correctly the program:
+Built using **Flask**, **Flask-SocketIO** and **PyYALM**, all required to run correctly the program:
 
     pip install Flask or pip3 install Flask
 
     pip install PyYAML or pip3 install PyYAML
+
+    pip install flask-socketio or pip install flask-socketio
+
 
 Linux and MacOS users need to manually install Tkinter
 

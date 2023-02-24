@@ -2,6 +2,7 @@ import threading
 from flask import Flask, render_template, request, make_response, send_from_directory, url_for
 from readtests import RT
 from datetime import datetime
+from flask_socketio import SocketIO
 
 # Variables necesarias para la comunicación entre los dos procesos
 rt = RT()
@@ -14,7 +15,7 @@ pendientes = list(rt.questions.keys())
 
 # Funciones del profesor/maestro/director de juego
 host_player = Flask(__name__)
-
+socketio_host = SocketIO(host_player)
 
 @host_player.route("/", methods=['GET', 'POST'])
 def index():
@@ -123,7 +124,7 @@ def fin():
 
 # Funciones del jugador
 player_side = Flask(__name__)
-
+socketio_player = SocketIO(player_side)
 
 @player_side.route("/")
 def index():
@@ -200,28 +201,15 @@ def respuesta():
     num_preg = pendientes[0]
     correcta = rt.questions[num_preg]['correct']
 
-    '''print('\n')
-    print('INFO AL ACTUALIZARSE LA PÁGINA')
-    print('La puntuación es de:' + str(jugador['puntuaciones']))
-    print('el total de preguntas respondidas es de:' + str(jugador['total']))
-    print(f'El valor de pendientes es de {pendientes}')
-    print(f'estamos en en la pregunta {pendientes[0]}')
-    print('\n')'''
     if request.method == 'POST':
         # Añade 1 al contador de preguntas realizadas
         jugador['total'] += 1
-        print(f'El jugador ha respondido en la pregunta {num_preg} haciendo un total de respondidas de ' + str(
-            jugador['total']))
-        print('\n')
-
+    
         # si respuesta correcta sumar punto
         if request.form['submit_button'] == str(correcta):
             jugador['puntuaciones'] += 1
-            '''print(f'El jugador ha obtenido un punto con una puntuacion total de: ' + str(jugador['puntuaciones']))
-            print('\n')'''
-
         return nextq()
-
+    
     data = {
         'web': 'CloneHoot - Quiz',
         'topic': topic,
@@ -260,11 +248,11 @@ def nextq():
 
 
 def start_host():
-    host_player.run(port=5000)
+    socketio_host.run(app=host_player, port=5000)
 
 
 def start_player():  # TODO host="0.0.0.0" will make the page accessable
-    player_side.run(port=5001)
+    socketio_player.run(app=player_side, host="0.0.0.0", port=5001)
 
 
 def ganador():
