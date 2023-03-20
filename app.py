@@ -236,11 +236,6 @@ def nextq():
     global contador
     global pendientes
     
-    num_preg = pendientes[0]
-    usuario = request.cookies.get('apodo')
-    jugador = jugadores[usuario]
-    correcta = rt.questions[num_preg]['correct']
-
     if len(pendientes) == 0:
         # fin del juego
         data = {
@@ -249,9 +244,13 @@ def nextq():
             'puntuacion': ganador()[1],
             'lista': ganador()[2],
         }
-
         return render_template('fin.html', data=data)
-
+    
+    num_preg = pendientes[0]
+    usuario = request.cookies.get('apodo')
+    jugador = jugadores[usuario]
+    correcta = rt.questions[num_preg]['correct']
+    
     if jugador['total'] == contador:
         return respuesta()
 
