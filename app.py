@@ -26,7 +26,7 @@ def index():
     lista_usuarios = ''
 
     for usuario in jugadores.values():
-        lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
+        lista_usuarios = lista_usuarios + (usuario['apodo']+ ', ')
 
     if request.method == 'POST':
         start_time = datetime.now().timestamp()
@@ -68,12 +68,10 @@ def test():
     respuestas = rt.questions[num_preg]['answers']
     # Devuelve ell tiempo restante de la pregunta
     time_remaining = (question_time - int(datetime.now().timestamp() - start_time))
-
     # debería mostrar lista de jugadores por responder o ya respondidos
     for usuario in jugadores.values():
         if usuario['total'] == contador:
-            lista_usuarios = lista_usuarios + ' ' + usuario['apodo']
-
+            lista_usuarios = lista_usuarios + (usuario['apodo'] + ', ')
     # 15 segundos para responder
     if datetime.now().timestamp() - start_time >= question_time:
         start_time = datetime.now().timestamp()
@@ -86,7 +84,7 @@ def test():
             'preguntas': enunciado,
             'respuestas': respuestas,
             'usuarios': lista_usuarios,
-            'tiempo': time_remaining
+            'tiempo': time_remaining,
         }
 
         return render_template('test_img.html', data=data, image=url_for('download_file', name=enunciado))
@@ -98,7 +96,7 @@ def test():
         'preguntas': enunciado,
         'respuestas': respuestas,
         'usuarios': lista_usuarios,
-        'tiempo': time_remaining
+        'tiempo': time_remaining,
     }
 
     return render_template('test.html', data=data)
@@ -146,6 +144,20 @@ def registrar():
 
     # Comprueba si el user existe
     if user in jugadores:
+        data = {
+            'web': 'CloneHoot',
+        }
+        return render_template('player_taken.html', data=data)
+
+    # Comprueba si el user tiene caracteres prohibidos
+    for item in ',-;':
+        if item in user:
+            data = {
+                'web': 'CloneHoot',
+            }
+            return render_template('player_taken.html', data=data)
+    
+    if user == '' or user == ' ':
         data = {
             'web': 'CloneHoot',
         }
@@ -223,8 +235,11 @@ def nextq():
     # La plantilla para la espera a la siguiente pregunta
     global contador
     global pendientes
+    
+    num_preg = pendientes[0]
     usuario = request.cookies.get('apodo')
     jugador = jugadores[usuario]
+    correcta = rt.questions[num_preg]['correct']
 
     if len(pendientes) == 0:
         # fin del juego
@@ -242,6 +257,7 @@ def nextq():
 
     data = {
         'web': 'CloneHoot - Quiz',
+        'correcta': correcta
     }
 
     return render_template('next.html', data=data)
