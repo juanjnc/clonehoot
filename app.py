@@ -37,7 +37,7 @@ def index():
     data = {
         'web': 'CloneHoot',
         'bienvenida': '¡Saludos!',
-        'usuarios': lista_usuarios,
+        'usuarios': lista_usuarios[:-2],
     }
 
     return make_response(render_template('index.html', data=data))
@@ -71,7 +71,7 @@ def test():
     # debería mostrar lista de jugadores por responder o ya respondidos
     for usuario in jugadores.values():
         if usuario['total'] == contador:
-            lista_usuarios = lista_usuarios + (usuario['apodo'] + ', ')
+            lista_usuarios = lista_usuarios + (usuario['apodo']+ ', ')
     # 15 segundos para responder
     if datetime.now().timestamp() - start_time >= question_time:
         start_time = datetime.now().timestamp()
@@ -83,7 +83,7 @@ def test():
             'topic': topic,
             'preguntas': enunciado,
             'respuestas': respuestas,
-            'usuarios': lista_usuarios,
+            'usuarios': lista_usuarios[:-2],
             'tiempo': time_remaining,
         }
 
