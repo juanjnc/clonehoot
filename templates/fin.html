@@ -3,10 +3,11 @@
 {% block title %}{{ data.web }}{% endblock %}
 
 {% block body %}
-   <h1>Juego terminado. Ganador:</h1>
+   <h1>Game finished. Please restart server for a New Game.</h1>
+   <h1>The Winner is...</h1>
    <h2>{{ data.ganador }}</h2>
    <h2>{{ data.puntuacion }}</h2>
-   <h2>Lista de Jugadores:</h2>
+   <h2>Player list:</h2>
    <h3>{{ data.lista }}</h3>
 
 {% endblock %}

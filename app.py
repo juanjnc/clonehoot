@@ -1,8 +1,10 @@
-import threading
-from flask import Flask, render_template, request, make_response, send_from_directory, url_for
-from readtests import RT
 from datetime import datetime
+from threading import Thread
+
+from flask import (Flask, make_response, render_template, request, send_from_directory, url_for)
 from flask_socketio import SocketIO
+
+from readtests import RT
 
 # Variables necesarias para la comunicación entre los dos procesos
 rt = RT()
@@ -36,7 +38,7 @@ def index():
 
     data = {
         'web': 'CloneHoot',
-        'bienvenida': '¡Saludos!',
+        'bienvenida': 'Welcome!',
         'usuarios': lista_usuarios[:-2],
     }
 
@@ -129,7 +131,7 @@ def index():
     # Página principal del jugador
     data = {
         'web': 'CloneHoot',
-        'bienvenida': '¡Saludos, Jugadores!',
+        'bbienvenida': 'Welcome Players!',
     }
 
     return render_template('player.html', data=data)
@@ -157,7 +159,7 @@ def registrar():
             }
             return render_template('player_taken.html', data=data)
     
-    if user == '' or user == ' ':
+    if user == '' or user == ' ' or len(user)>15: # comprobar si se puede poer limite de caracter al input
         data = {
             'web': 'CloneHoot',
         }
@@ -166,7 +168,7 @@ def registrar():
     # Se crea una cookie con el usuario dado
     nuevo_usuario = {'apodo': user, 'puntuaciones': 0, 'total': -1}
     jugadores[user] = nuevo_usuario
-    bienvenido = f'Hola {user}, enseguida empezamos'
+    bienvenido = f"Hello {user}, we'll start right away"
 
     data = {
         'web': 'CloneHoot',
@@ -188,7 +190,7 @@ def espera():
     else:
         redirigida = 'respuesta'
     usuario = request.cookies.get('apodo')
-    bienvenido = f'Hola {usuario}, esperando a más jugadores'
+    bienvenido = f'Hello {usuario}, waiting for more players'
 
     data = {
         'web': 'CloneHoot',
@@ -282,14 +284,14 @@ def ganador():
         if valores['puntuaciones'] > maxima:
             maxima = valores['puntuaciones']
             nombre = jugador
-    lista.sort()
+    lista.sort(reverse=True)
 
     return [nombre, maxima, lista]
 
 
 if __name__ == '__main__':
-    thread1 = threading.Thread(target=start_host)
-    thread2 = threading.Thread(target=start_player)
+    thread1 = Thread(target=start_host)
+    thread2 = Thread(target=start_player)
 
     thread1.start()
     thread2.start()

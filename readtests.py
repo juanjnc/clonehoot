@@ -1,7 +1,9 @@
-import yaml  # PyYAML
+from random import shuffle
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
-from random import shuffle
+
+import yaml  # PyYAML
+
 
 class RT:
     def __init__(self):
@@ -9,8 +11,8 @@ class RT:
         self.questions = {0: {'TITLE': f'You have 15 seconds to answer',
                               'answers': ['This show the options in the test',
                                           'Only one is correct, search the matching button',
-                                          'Press now any button to continue',
-                                          'Have fun!'],
+                                          'If you forgot answer one question, you wil be kicked out due a bug',
+                                          'Press now any button to continue. Have Fun'],
                               'correct': 0}}
         self.read_questions()
 
