@@ -66,14 +66,14 @@ def test_page():
     }
 
     if question_data["TITLE"].endswith(".png"):
-        return render_template("test_img.html", data=template_data, image=url_for("download_file", name=question_data["TITLE"]))
+        return render_template("test_img.html", data=template_data, image=url_for("download_file", apodo=question_data["TITLE"]))
     return render_template("test.html", data=template_data)
 
 
-@host_app.route("/<path:name>")
-def download_file(name):
+@host_app.route("/<path:apodo>")
+def download_file(apodo):
     """Serves image files for questions."""
-    return send_from_directory("./tests", name, as_attachment=True)
+    return send_from_directory("./tests", apodo, as_attachment=True)
 
 
 @host_app.route("/fin", methods=["GET", "POST"])
@@ -82,7 +82,7 @@ def final_page():
     winner = calculate_winner()
     data = {
         "web": "CloneHoot - Quiz",
-        "winner": winner["name"],
+        "winner": winner["apodo"],
         "score": winner["score"],
         "leaderboard": winner["leaderboard"],
     }
@@ -105,14 +105,14 @@ def register_player():
     """Handles player registration."""
     global players
     if request.method == "POST":
-        nickname = request.form["name"]
+        nickname = request.form["apodo"]
         if nickname in players or any(c in nickname for c in ",-;") or not nickname or len(nickname) > 15:
             return render_template("player_taken.html", data={"web": "CloneHoot"})
 
         players[nickname] = {"nickname": nickname, "score": 0, "total": -1}
         welcome_message = f"Hello {nickname}, we'll start right away"
         response = make_response(render_template("waiting.html", data={"web": "CloneHoot", "welcome_message": welcome_message}))
-        response.set_cookie("name", nickname)
+        response.set_cookie("apodo", nickname)
         return response
     return render_template("register.html")
 
@@ -121,7 +121,7 @@ def register_player():
 def waiting_page():
     """Waiting page for players until the game starts."""
     global waiting_game
-    nickname = request.cookies.get("name")
+    nickname = request.cookies.get("apodo")
     message = f"Hello {nickname}, waiting for more players"
     data = {"web": "CloneHoot", "welcome_message": message, "refresh": "1; URL=answer" if not waiting_game else "1; URL=waiting"}
     return render_template("waiting2.html", data=data)
@@ -131,7 +131,7 @@ def waiting_page():
 def submit_answer():
     """Handles player responses to questions."""
     global pending_questions
-    nickname = request.cookies.get("name")
+    nickname = request.cookies.get("apodo")
     player = players[nickname]
     topic = rt.topic
     question_id = pending_questions[0]
@@ -155,7 +155,7 @@ def next_question():
         return final_page()
 
     question_id = pending_questions[0]
-    nickname = request.cookies.get("name")
+    nickname = request.cookies.get("apodo")
     player = players[nickname]
     correct_answer = rt.questions[question_id]["correct"]
     if player["total"] == current_question_index:
@@ -184,7 +184,7 @@ def calculate_winner():
     )
     winner_name, max_score = leaderboard[0]
     return {
-        "name": winner_name,
+        "apodo": winner_name,
         "score": max_score,
         "leaderboard": [f"{nick} => {score}" for nick, score in leaderboard]
     }
