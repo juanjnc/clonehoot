@@ -1,0 +1,12 @@
+{% extends './layout.html' %}
+
+{% block title %}
+    {{ data.web }}
+{% endblock %}
+
+{% block body %}
+    <!-- This meta tag controls how often the page refreshes, dynamically set by the server -->
+    <meta http-equiv="refresh" content="{{ data.refresh }}" /> <!-- Changed from 'refrescar' -->
+
+    <h1>{{ data.welcome_message }}</h1> <!-- Changed from 'bienvenida' -->
+{% endblock %}

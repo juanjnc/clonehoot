@@ -1,13 +1,14 @@
-{% extends './layout.html' %}
+{% extends "./layout.html" %}
 
-{% block title %}{{ data.web }}{% endblock %}
+{% block title %}
+    {{ data.web }}
+{% endblock %}
 
 {% block body %}
-   <h1>Game finished. Please restart server for a New Game.</h1>
-   <h1>The Winner is...</h1>
-   <h2>{{ data.ganador }}</h2>
-   <h2>{{ data.puntuacion }}</h2>
-   <h2>Player list:</h2>
-   <h3>{{ data.lista }}</h3>
-
+    <h1>Game Finished! Please restart the server for a New Game.</h1>
+    <h1>The Winner is...</h1>
+    <h2>{{ data.winner }}</h2> <!-- Changed from 'ganador' -->
+    <h2>Score: {{ data.score }}</h2> <!-- Changed from 'puntuacion' -->
+    <h2>Player List:</h2>
+    <h3>{{ data.leaderboard }}</h3> <!-- Changed from 'lista' -->
 {% endblock %}

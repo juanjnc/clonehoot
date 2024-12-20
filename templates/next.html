@@ -1,10 +1,14 @@
 {% extends './layout.html' %}
 
-{% block title %}{{ data.web }}{% endblock %}
+{% block title %}
+    {{ data.web }}
+{% endblock %}
 
 {% block body %}
-   <h1>Waiting for all the Players</h1>
-   <h1>The correct answer was:</h1>
-   <h1>{{data.correcta}}</h1>
-   <meta http-equiv="refresh" content="1; URL=next" />
+    <h1>Waiting for All Players...</h1>
+    <h2>The correct answer was:</h2>
+    <h2>{{ data.correct_answer }}</h2> <!-- Changed from 'correcta' -->
+
+    <!-- Automatically refreshes to the next question -->
+    <meta http-equiv="refresh" content="1; URL=next" />
 {% endblock %}

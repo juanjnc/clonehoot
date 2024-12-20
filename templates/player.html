@@ -1,14 +1,16 @@
 {% extends './layout.html' %}
 
-{% block title %}{{ data.web }}{% endblock %}
+{% block title %}
+    {{ data.web }}
+{% endblock %}
 
 {% block body %}
-<h1>{{ data.bienvenida }}</h1>
-<h2>Welcome to CloneHoot</h2>
-<form action = "/registrar" method = "POST">
-   <p><h3>Write an Username</h3>
-   <p><h3>The Username can not be more than 15 characters nor contain the following symbols , - ;</h3>
-   <p><input type = 'text' name = 'apodo'/></p>
-   <p><input type = 'submit' value = 'Jugar'/></p>
-</form>
+    <h1>{{ data.welcome_message }}</h1> <!-- Changed from 'bienvenida' -->
+    <h2>Welcome to CloneHoot</h2>
+    <form action="/register" method="POST"> <!-- Changed action to '/register' -->
+        <p><h3>Enter a Username</h3></p>
+        <p><h3>The username must not exceed 15 characters and cannot contain the following symbols: , - ;</h3></p>
+        <p><input type='text' name='apodo'/></p>
+        <p><input type='submit' value='Play'/></p>
+    </form>
 {% endblock %}
