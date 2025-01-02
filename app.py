@@ -61,12 +61,9 @@ def test_page():
         "answers": question_data["answers"],
         "players": player_list,
         "time_remaining": time_remaining,
+        "image": url_for("download_file", apodo=question_data["TITLE"]) if question_data["TITLE"].endswith(".png") else None
     }
 
-    if question_data["TITLE"].endswith(".png"):
-        return render_template(
-            "test_img.html", data=template_data, image=url_for("download_file", apodo=question_data["TITLE"])
-        )
     return render_template("test.html", data=template_data)
 
 
