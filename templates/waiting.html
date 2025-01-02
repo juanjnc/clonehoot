@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block body %}
-    <!-- Automatically refresh to keep checking the game state -->
-    <meta http-equiv="refresh" content="1; URL=waiting" /> <!-- Change from fixed URL to managed refresh logic if applicable -->
+    <!-- This meta tag controls how often the page refreshes, dynamically set by the server -->
+    <meta http-equiv="refresh" content="{{ data.refresh }}" />
 
-    <h1>{{ data.welcome_message }}</h1> <!-- Changed from 'bienvenida' -->
+    <h1>{{ data.welcome_message }}</h1>
 {% endblock %}

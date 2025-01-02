@@ -1,16 +1,12 @@
 from datetime import datetime
-from threading import Thread
-from flask import Flask, make_response, render_template, request, send_from_directory, url_for
+from flask import Flask, make_response, render_template, request, send_from_directory, url_for, redirect
 from flask_socketio import SocketIO
 from readtests import RT
 
-# Initialize applications
+# Initialize application
 rt = RT()  # Initialize RT class for handling questions
-host_app = Flask(__name__)
-socketio_host = SocketIO(host_app)
-
-player_app = Flask(__name__)
-socketio_player = SocketIO(player_app)
+app = Flask(__name__)
+socketio = SocketIO(app)
 
 # Game state
 waiting_game = True
@@ -22,12 +18,12 @@ pending_questions = list(rt.questions.keys())
 
 
 # Host routes
-@host_app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def host_index():
     """Main page for the host."""
     global start_time
     player_list = ", ".join(player["nickname"] for player in players.values())
-    if request.method == "POST" and request.form.get('submit_button') == 'Start Game':
+    if request.method == "POST" and request.form.get("submit_button") == "Start Game":
         start_time = datetime.now().timestamp()
         return test_page()
 
@@ -35,11 +31,11 @@ def host_index():
     return render_template("index.html", data=data)
 
 
-@host_app.route("/test", methods=["GET", "POST"])
+@app.route("/test", methods=["GET", "POST"])
 def test_page():
     """Update test page during the quiz."""
     global start_time, current_question_index, pending_questions, waiting_game
-    
+
     waiting_game = False
 
     if not pending_questions:
@@ -50,7 +46,9 @@ def test_page():
     question_data = rt.questions[question_id]
 
     time_remaining = max_question_time - int(datetime.now().timestamp() - start_time)
-    player_list = ", ".join(player["nickname"] for player in players.values() if player["total"] == current_question_index)
+    player_list = ", ".join(
+        player["nickname"] for player in players.values() if player["total"] == current_question_index
+    )
 
     if time_remaining <= 0:
         start_time = datetime.now().timestamp()
@@ -62,21 +60,23 @@ def test_page():
         "question": question_data["TITLE"],
         "answers": question_data["answers"],
         "players": player_list,
-        "time_remaining": time_remaining
+        "time_remaining": time_remaining,
     }
 
     if question_data["TITLE"].endswith(".png"):
-        return render_template("test_img.html", data=template_data, image=url_for("download_file", apodo=question_data["TITLE"]))
+        return render_template(
+            "test_img.html", data=template_data, image=url_for("download_file", apodo=question_data["TITLE"])
+        )
     return render_template("test.html", data=template_data)
 
 
-@host_app.route("/<path:apodo>")
+@app.route("/<path:apodo>")
 def download_file(apodo):
     """Serves image files for questions."""
     return send_from_directory("./tests", apodo, as_attachment=True)
 
 
-@host_app.route("/fin", methods=["GET", "POST"])
+@app.route("/fin", methods=["GET", "POST"])
 def final_page():
     """Displays the final results."""
     winner = calculate_winner()
@@ -90,7 +90,7 @@ def final_page():
 
 
 # Player routes
-@player_app.route("/")
+@app.route("/player/")
 def player_index():
     """Landing page for players."""
     data = {
@@ -100,34 +100,41 @@ def player_index():
     return render_template("player.html", data=data)
 
 
-@player_app.route("/register", methods=["POST", "GET"])
+@app.route("/player/register", methods=["POST", "GET"])
 def register_player():
     """Handles player registration."""
     global players
     if request.method == "POST":
         nickname = request.form["apodo"]
         if nickname in players or any(c in nickname for c in ",-;") or not nickname or len(nickname) > 15:
-            return render_template("player_taken.html", data={"web": "CloneHoot"})
+            return render_template(
+                "player_taken.html",
+                data={"web": "CloneHoot", "welcome_message": "Username already taken or invalid name"},
+            )
 
         players[nickname] = {"nickname": nickname, "score": 0, "total": -1}
         welcome_message = f"Hello {nickname}, we'll start right away"
-        response = make_response(render_template("waiting.html", data={"web": "CloneHoot", "welcome_message": welcome_message}))
+        response = make_response(redirect(url_for("player_waiting")))
         response.set_cookie("apodo", nickname)
         return response
-    return render_template("register.html")
+    return render_template("register.html", data={"web": "CloneHoot", "welcome_message": "Welcome Players!"})
 
 
-@player_app.route("/waiting")
-def waiting_page():
+@app.route("/player/waiting")
+def player_waiting():
     """Waiting page for players until the game starts."""
-    global waiting_game
-    nickname = request.cookies.get("apodo")
-    message = f"Hello {nickname}, waiting for more players"
-    data = {"web": "CloneHoot", "welcome_message": message, "refresh": "1; URL=answer" if not waiting_game else "1; URL=waiting"}
-    return render_template("waiting2.html", data=data)
+    if not waiting_game:
+        return redirect(url_for("submit_answer"))
+    data = {"web": "CloneHoot", "refresh": 5, "welcome_message": "Welcome to the Waiting Room"}  # Example refresh rate
+    return render_template("waiting.html", data=data)
 
 
-@player_app.route("/answer", methods=["GET", "POST"])
+@app.route("/player/waiting2")
+def player_waiting2():
+    return redirect(url_for("player_waiting"))
+
+
+@app.route("/player/answer", methods=["GET", "POST"])
 def submit_answer():
     """Handles player responses to questions."""
     global pending_questions
@@ -148,7 +155,7 @@ def submit_answer():
     return render_template("answer.html", data=data)
 
 
-@player_app.route("/next", methods=["GET", "POST"])
+@app.route("/player/next", methods=["GET", "POST"])
 def next_question():
     """Prepares the next question or ends the game if no more questions."""
     if not pending_questions:
@@ -165,35 +172,18 @@ def next_question():
     return render_template("next.html", data=data)
 
 
-def start_host():
-    """Starts the host side of the application."""
-    socketio_host.run(app=host_app, host='0.0.0.0', port=5000)
-
-
-def start_player():
-    """Starts the player side of the application."""
-    socketio_player.run(app=player_app, host='0.0.0.0', port=5001)
-
-
 def calculate_winner():
     """Calculates and returns the winner of the quiz."""
     leaderboard = sorted(
-        ((nickname, attrs['score']) for nickname, attrs in players.items()), 
-        key=lambda x: x[1],
-        reverse=True
+        ((nickname, attrs["score"]) for nickname, attrs in players.items()), key=lambda x: x[1], reverse=True
     )
     winner_name, max_score = leaderboard[0]
     return {
         "apodo": winner_name,
         "score": max_score,
-        "leaderboard": [f"{nick} => {score}" for nick, score in leaderboard]
+        "leaderboard": [f"{nick} => {score}" for nick, score in leaderboard],
     }
 
 
 if __name__ == "__main__":
-    host_thread = Thread(target=start_host, daemon=True)
-    player_thread = Thread(target=start_player, daemon=True)
-    host_thread.start()
-    player_thread.start()
-    host_thread.join()
-    player_thread.join()
+    socketio.run(app, host="0.0.0.0", port=5000)
