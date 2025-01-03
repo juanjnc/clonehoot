@@ -5,9 +5,13 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ data.welcome_message }}</h1> <!-- Changed from 'bienvenida' -->
+    <h1>{{ data.welcome_message }}</h1>
     <h2>Welcome to CloneHoot</h2>
-    <form action="/player/register" method="POST"> <!-- Changed action to '/player/register' -->
+    {% if data.error %}
+        <h3>Username already taken or invalid name</h3>
+        <h3>Please choose another Username</h3>
+    {% endif %}
+    <form action="/player/register" method="POST">
         <p><h3>Enter a Username</h3></p>
         <p><h3>The username must not exceed 15 characters and cannot contain the following symbols: , - ;</h3></p>
         <p><input type='text' name='apodo'/></p>

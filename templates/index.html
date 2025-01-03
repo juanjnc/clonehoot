@@ -5,15 +5,19 @@
 {% endblock %}
 
 {% block body %}
-    <!-- This meta tag refreshes the page every 3 seconds to update the player list dynamically -->
-    <meta http-equiv="refresh" content="3" />
-
-    <h1>{{ data.welcome_message }}</h1> <!-- Changed from 'bienvenida' -->
+    <h1>{{ data.welcome_message }}</h1>
     <h2>Welcome to CloneHoot</h2>
-    <h3>Players: {{ data.players }}</h3> <!-- Changed from 'usuarios' -->
+    <h3>Players: <span id="players-list">{{ data.players }}</span></h3>
 
     <form method="POST">
-        <!-- Button to start the game -->
         <input type="submit" name="submit_button" value="Start Game" />
     </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    setInterval(() => {
+        socket.emit('update_players');
+    }, 2000);
+</script>
 {% endblock %}

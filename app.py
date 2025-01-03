@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Flask, make_response, render_template, request, send_from_directory, url_for, redirect
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit, join_room
 from readtests import RT
 
 # Initialize application
@@ -12,7 +12,7 @@ socketio = SocketIO(app)
 waiting_game = True
 players = {}
 start_time = 0
-max_question_time = 15
+max_question_time = 10
 current_question_index = 0
 pending_questions = list(rt.questions.keys())
 
@@ -46,24 +46,22 @@ def test_page():
     question_data = rt.questions[question_id]
 
     time_remaining = max_question_time - int(datetime.now().timestamp() - start_time)
-    player_list = ", ".join(
-        player["nickname"] for player in players.values() if player["total"] == current_question_index
-    )
-
+    
     if time_remaining <= 0:
         start_time = datetime.now().timestamp()
         pending_questions.pop(0)
+        socketio.emit('time_up')
 
     template_data = {
         "web": "CloneHoot - Quiz",
         "topic": rt.topic,
         "question": question_data["TITLE"],
         "answers": question_data["answers"],
-        "players": player_list,
         "time_remaining": time_remaining,
         "image": url_for("download_file", apodo=question_data["TITLE"]) if question_data["TITLE"].endswith(".png") else None
     }
-
+    
+    socketio.emit('update_question', template_data)
     return render_template("test.html", data=template_data)
 
 
@@ -104,13 +102,14 @@ def register_player():
     if request.method == "POST":
         nickname = request.form["apodo"]
         if nickname in players or any(c in nickname for c in ",-;") or not nickname or len(nickname) > 15:
-            return render_template(
-                "player_taken.html",
-                data={"web": "CloneHoot", "welcome_message": "Username already taken or invalid name"},
-            )
+            data = {
+                "web": "CloneHoot",
+                "welcome_message": "Welcome Players!",
+                "error": True
+            }
+            return render_template("player.html", data=data)
 
         players[nickname] = {"nickname": nickname, "score": 0, "total": -1}
-        welcome_message = f"Hello {nickname}, we'll start right away"
         response = make_response(redirect(url_for("player_waiting")))
         response.set_cookie("apodo", nickname)
         return response
@@ -140,11 +139,16 @@ def submit_answer():
     topic = rt.topic
     question_id = pending_questions[0]
     correct_answer = rt.questions[question_id]["correct"]
+    
     if request.method == "POST":
         player["total"] += 1
-        if request.form["submit_button"] == correct_answer:
-            player["score"] += 1
+        submitted_answer = request.form["submit_button"]
+        # Asegurar que la comparación sea entre strings o entre integers
+        if str(submitted_answer) == str(correct_answer):
+            player["score"] += 1  # Asignar 1 puntos por respuesta correcta
+            print(f"Player {nickname} scored! New score: {player['score']}")  # Debug log
         return next_question()
+
     data = {
         "web": "CloneHoot - Quiz",
         "topic": topic,
@@ -181,6 +185,79 @@ def calculate_winner():
         "leaderboard": [f"{nick} => {score}" for nick, score in leaderboard],
     }
 
+
+@socketio.on('connect')
+def handle_connect():
+    """Maneja la conexión de un cliente Socket.IO"""
+    if request.cookies.get('apodo'):
+        join_room(request.cookies.get('apodo'))
+
+@socketio.on('check_game_status')
+def check_game_status():
+    """Emite el estado actual del juego"""
+    if not waiting_game:
+        emit('game_started', broadcast=False)
+
+@socketio.on('update_players')
+def update_players():
+    """Emite la lista actualizada de jugadores"""
+    player_list = ", ".join(player["nickname"] for player in players.values())
+    emit('players_updated', {'players': player_list}, broadcast=True)
+
+@socketio.on('submit_answer')
+def handle_answer(data):
+    """Maneja las respuestas de los jugadores"""
+    global pending_questions
+    nickname = request.cookies.get('apodo')
+    if nickname and nickname in players:
+        player = players[nickname]
+        question_id = pending_questions[0]
+        correct_answer = rt.questions[question_id]['correct']
+        
+        # Actualizar puntuación
+        player['total'] += 1
+        if str(data['answer']) == str(correct_answer):
+            player['score'] += 1
+            print(f"Player {nickname} got correct answer! New score: {player['score']}")
+        
+        emit('answer_received', {
+            'correct': correct_answer, 
+            'was_correct': str(data['answer']) == str(correct_answer),
+            'new_score': player['score']
+        }, room=nickname)
+
+@socketio.on('request_question_update')
+def handle_question_update():
+    """Maneja las solicitudes de actualización de preguntas"""
+    global start_time, pending_questions
+    
+    time_remaining = max_question_time - int(datetime.now().timestamp() - start_time)
+    
+    if time_remaining <= 0:
+        start_time = datetime.now().timestamp()
+        pending_questions.pop(0)
+        emit('update_question', {'redirect': True})
+    else:
+        emit('update_question', {
+            'redirect': False,
+            'time_remaining': time_remaining
+        })
+
+@socketio.on('check_next_status')
+def check_next_status():
+    """Maneja las solicitudes de actualización de la página next"""
+    global pending_questions
+    if not pending_questions:
+        emit('next_status', {'game_finished': True})
+    else:
+        nickname = request.cookies.get('apodo')
+        if nickname and nickname in players:
+            player = players[nickname]
+            should_advance = True if player["total"] == current_question_index else False
+            emit('next_status', {
+                'game_finished': False,
+                'should_advance': should_advance
+            })
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
